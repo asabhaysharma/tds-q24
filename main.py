@@ -6,12 +6,13 @@ import os
 import logging
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware # <--- NEW IMPORT
 from pydantic import BaseModel
 
 # --- Configuration ---
 # Try to get key, but don't crash if missing
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") 
-print(OPENAI_API_KEY)
+
 # Specific target email from the assignment
 TARGET_NOTIFICATION_EMAIL = "23f3003276@ds.study.iitm.ac.in"
 
@@ -20,6 +21,16 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("DataFlowPipeline")
 
 app = FastAPI()
+
+# --- FIX CORS HERE ---
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows ALL domains (for assignment submission)
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods (POST, GET, etc.)
+    allow_headers=["*"],  # Allows all headers
+)
+# ---------------------
 
 # --- Database Setup (SQLite) ---
 DB_NAME = "pipeline_storage.db"
@@ -99,7 +110,6 @@ async def analyze_with_ai(text: str):
             # REPLACE THIS URL with the one from your assignment instructions
             base_url="https://aipipe.org/openai/v1" 
         )
-        
         prompt = (
             f"Analyze this in 2 sentences. "
             f"Then classify sentiment as enthusiastic, critical, or objective.\n\n"
@@ -121,8 +131,6 @@ async def analyze_with_ai(text: str):
         return {"analysis": analysis, "sentiment": sentiment}
 
     except Exception as e:
-        # If API fails (e.g. 401 error from your logs), log it but return Mock data 
-        # so the pipeline succeeds for the assignment.
         logger.warning(f"OpenAI API call failed ({str(e)}). Using Mock response.")
         return {
             "analysis": "Mock Analysis (API Error fallback). Key themes: Error handling demonstration.",
@@ -206,9 +214,7 @@ async def run_pipeline(request: PipelineRequest):
     }
 
 if __name__ == "__main__":
-    # Get the PORT from the environment (Railway sets this automatically)
-    # If not found (e.g., local testing), default to 8000
     port = int(os.environ.get("PORT", 8000))
-    
-    # Run the app with the correct host and port
     uvicorn.run(app, host="0.0.0.0", port=port)
+
+
