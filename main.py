@@ -96,11 +96,6 @@ async def analyze_with_ai(text: str):
     """
     
     # 1. Check if key exists. If not, return Mock immediately.
-    if not OPENAI_API_KEY or OPENAI_API_KEY.strip() == "":
-        return {
-            "analysis": "Mock Analysis (No API Key provided). Key themes: Placeholder data.",
-            "sentiment": "objective"
-        }
 
     # 2. Try Real API Call
     try:
@@ -112,7 +107,7 @@ async def analyze_with_ai(text: str):
         )
         prompt = (
             f"Analyze this in 2 sentences. "
-            f"Then classify sentiment as enthusiastic, critical, or objective.\n\n"
+            f"Then classify sentiment as positive, negative, or neutral. Use only these 3 words.\n\n"
             f"Text: {text}\n\n"
             f"Format: Analysis: [text] || Sentiment: [class]"
         )
