@@ -107,7 +107,7 @@ async def analyze_with_ai(text: str):
         )
         prompt = (
             f"Analyze this in 2 sentences. "
-            f"Then classify sentiment as positive, negative, or neutral. Use only these 3 words.\n\n"
+            f"Then classify sentiment as enthusiastic, critical, objective. Use only these 3 words.\n\n"
             f"Text: {text}\n\n"
             f"Format: Analysis: [text] || Sentiment: [class]"
         )
